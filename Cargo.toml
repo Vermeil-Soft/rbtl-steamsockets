@@ -4,3 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+# steamworks = { version = ">=0.13, <1" }
+steamworks = { git = "https://github.com/Vermeil-Soft/steamworks-rs.git", branch = "networking_identity_fix2"}
+rbtl-core = { git = "https://github.com/Vermeil-Soft/rbtl.git", rev = "a54a6d32446d0828bcc18c" }
+hashbrown = ">=0.9, <1"
+log = "0.4"

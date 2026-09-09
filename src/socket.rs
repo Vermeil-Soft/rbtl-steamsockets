@@ -4,6 +4,8 @@ use crate::{
     common::{SeqId, is_seq_id_past}, error::Error, ping_tracker::PingTracker, raw_msg
 };
 
+use rbtl_core::{Status, Event};
+
 use hashbrown::HashSet;
 use steamworks::{
     Client as SteamClient,
@@ -27,6 +29,15 @@ pub enum SocketStatus {
 }
 
 impl SocketStatus {
+    pub fn to_rbtl_status(self) -> Status {
+        match self {
+            SocketStatus::Connected => Status::Ok,
+            SocketStatus::Connecting => Status::Connecting,
+            SocketStatus::LocalError => Status::Timeout,
+            SocketStatus::Terminated { by_remote } => Status::Ended { by_remote },
+        }
+    }
+
     pub fn from_networking_conn_state(net_conn_state: &NetworkingConnectionState) -> Self {
         match net_conn_state {
             NetworkingConnectionState::ClosedByPeer => Self::Terminated { by_remote: true },
@@ -51,6 +62,15 @@ impl SocketStatus {
 pub enum SocketEvent {
     Data(Box<[u8]>),
     StatusChanged(SocketStatus),
+}
+
+impl SocketEvent {
+    pub fn to_rbtl_event(self) -> Event {
+        match self {
+            Self::Data(d) => Event::Data(d),
+            Self::StatusChanged(s) => Event::StatusChanged(s.to_rbtl_status())
+        }
+    }
 }
 
 pub struct Socket {
@@ -166,6 +186,7 @@ impl Socket {
 
     pub fn new_with(init: SocketInit, config: SocketConfig) -> Result<Self, Error> {
         let net_options = Self::get_networking_options(config.timeout);
+        log::info!("trying to connect to id {:?}", init.remote_identity);
         let net_conn = init.networking_sockets.connect_p2p(init.remote_identity.clone(), init.virt_port, net_options)
             .map_err(|e| Error::from_cause("failed to create steamworks-networkingsockets handle", e))?;
 

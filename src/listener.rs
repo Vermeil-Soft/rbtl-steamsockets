@@ -9,7 +9,7 @@ use steamworks::{
 };
 use hashbrown::HashMap;
 
-use crate::{error::Error, ping_tracker::PingTracker, socket::{Socket, SocketEvent, SocketConfig}};
+use crate::{ConnectInfo, error::Error, socket::{SendOptions, Socket, SocketConfig, SocketEvent}};
 
 #[derive(Debug, Clone)]
 pub struct ListenerConfig {
@@ -94,9 +94,10 @@ impl Listener {
                 return;
             }
         }
-        // connecting.remote().
         if let Err(e) = connection_request.accept() {
-            log::error!("accepting connection with friend {:?} returned {}", remote, e);
+            log::error!("accepting connection with user {:?} returned {}", remote, e);
+        } else {
+            log::info!("accepted connection with user {:?}", remote);
         }
     }
 
@@ -199,6 +200,27 @@ impl Listener {
 
     pub fn get_mut(&mut self, identity: &NetworkingIdentity) -> Option<&mut Socket> {
         self.remotes.get_mut(identity)
+    }
+
+    pub fn connect_info(&self) -> Option<Result<ConnectInfo, Error>> {
+        Some(Ok(ConnectInfo::new(self.steam_client.user().steam_id())))
+    }
+
+    pub fn send_data(&mut self, data: &[u8], send_options: SendOptions) -> Result<(), Error> {
+        let mut err: Option<Error> = None;
+        let mut has_success = false;
+        for socket in self.remotes.values_mut() {
+            match socket.send_data(data, send_options.clone()) {
+                Ok(_) => has_success = true,
+                Err(e) => err = Some(e),
+            }
+        }
+        if let Some(err) = err {
+            if !has_success {
+                return Err(err);
+            }
+        }
+        Ok(())
     }
     
     /// Returns an iterator that drain events for all known remotes

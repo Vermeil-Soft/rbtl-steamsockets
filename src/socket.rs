@@ -126,16 +126,14 @@ impl Default for SocketConfig {
     }
 }
 
-pub struct SocketInit<'a> {
-    pub networking_sockets: &'a NetworkingSockets,
+pub struct SocketCreateParams {
     pub remote_identity: NetworkingIdentity,
     pub virt_port: i32
 }
 
-impl<'a> SocketInit<'a> {
-    pub fn new<I: Into<NetworkingIdentity>>(networking_sockets: &'a NetworkingSockets, identity: I) -> Self {
+impl SocketCreateParams {
+    pub fn new<I: Into<NetworkingIdentity>>(identity: I) -> Self {
         Self {
-            networking_sockets,
             remote_identity: identity.into(),
             virt_port: 0
         }
@@ -180,17 +178,17 @@ impl Socket {
         r
     }
 
-    pub fn new(init: SocketInit) -> Result<Self, Error> {
-        Self::new_with(init, Default::default())
+    pub fn new(sockets: &NetworkingSockets, create_params: SocketCreateParams) -> Result<Self, Error> {
+        Self::new_with(sockets, create_params, Default::default())
     }
 
-    pub fn new_with(init: SocketInit, config: SocketConfig) -> Result<Self, Error> {
+    pub fn new_with(sockets: &NetworkingSockets, params: SocketCreateParams, config: SocketConfig) -> Result<Self, Error> {
         let net_options = Self::get_networking_options(config.timeout);
-        log::info!("trying to connect to id {:?}", init.remote_identity);
-        let net_conn = init.networking_sockets.connect_p2p(init.remote_identity.clone(), init.virt_port, net_options)
+        log::info!("trying to connect to id {:?}", params.remote_identity);
+        let net_conn = sockets.connect_p2p(params.remote_identity.clone(), params.virt_port, net_options)
             .map_err(|e| Error::from_cause("failed to create steamworks-networkingsockets handle", e))?;
 
-        Ok(Self::from_net_conn(net_conn, init.remote_identity, config))
+        Ok(Self::from_net_conn(net_conn, params.remote_identity, config))
     }
 
     /// Processes this socket's internals.
@@ -341,7 +339,7 @@ impl Socket {
 
     // Only returns true if the connection is disconnected and we don't have any more events to analyze
     pub fn should_clear(&self) -> bool {
-        self.status.can_use_net_conn() || !self.events.is_empty()
+        !self.status.can_use_net_conn() && self.events.is_empty()
     }
 
     pub fn send_end(&mut self) {

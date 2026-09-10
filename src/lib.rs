@@ -10,5 +10,5 @@ mod rbtl_impl;
 pub use listener::{Listener, ListenerConfig};
 pub use common::SeqId;
 pub use error::Error;
-pub use socket::{Socket, SocketInit, SocketConfig, SocketStatus, SocketEvent, SendOptions};
+pub use socket::{Socket, SocketCreateParams, SocketConfig, SocketStatus, SocketEvent, SendOptions};
 pub use connect_info::ConnectInfo;

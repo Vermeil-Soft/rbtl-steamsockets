@@ -1,11 +1,11 @@
 use std::sync::Arc;
 
 use rbtl_core::{Client, Event, ServClient, Server, Status, ServerStateError};
-use steamworks::{Client as SteamClient, networking_types::NetworkingIdentity};
+use steamworks::{Client as SteamClient, networking_sockets::NetworkingSockets, networking_types::NetworkingIdentity};
 
 use crate::{
     Listener, Socket, SocketConfig, SeqId, Error, ListenerConfig, ConnectInfo,
-    SocketEvent, SocketInit, SocketStatus, SendOptions
+    SocketEvent, SocketCreateParams, SocketStatus, SendOptions
 };
 
 impl Client for Socket {
@@ -14,7 +14,8 @@ impl Client for Socket {
     type ConnectOptions = SocketConfig;
     type StateError = Error;
     type SendError = Error;
-    type Init<'a> = SocketInit<'a>;
+    type CreateParams = SocketCreateParams;
+    type Stem<'a> = &'a NetworkingSockets;
     type SendOptions = SendOptions;
 
     fn status(&self) -> Status {
@@ -34,13 +35,13 @@ impl Client for Socket {
         self.drain_events().map(|e| e.to_rbtl_event())
     }
 
-    fn new<I: Into<Self::Init>>(init: I, options: Self::ConnectOptions) -> Result<Self, Self::StateError> where Self: Sized {
-        Self::new_with(init.into(), options)
+    fn new<'a>(stem: &'a Self::Stem<'a>, create_params: Self::CreateParams, options: Self::ConnectOptions) -> Result<Self, Self::StateError> where Self: Sized {
+        Self::new_with(stem, create_params, options)
     }
 
-    fn from_connect_info(connect_info: ConnectInfo, options: Self::ConnectOptions) ->
+    fn from_connect_info<'a>(stem: &'a Self::Stem<'a>, connect_info: ConnectInfo, options: Self::ConnectOptions) ->
         Result<Self, Self::StateError> where Self: Sized {
-        Socket::connect(connect_info.addr, options)
+        Socket::new_with(stem, SocketCreateParams::new(connect_info.identity), options)
     }
 
     fn process(&mut self) {
@@ -102,7 +103,8 @@ impl Server for Listener {
 
     type ServClient = Socket;
     type ConnectingClient = Socket;
-    type Init = SteamClient;
+    type Stem<'a> = SteamClient;
+    type CreateParams = ();
     type Key = NetworkingIdentity;
     type SendOptions = SendOptions;
     type SendError = Error;
@@ -152,14 +154,12 @@ impl Server for Listener {
         self.connect_info()
     }
 
-    fn new<I: Into<Self::Init>>(init: I) -> Result<Self, Self::StateError> where Self: Sized {
-        let init = init.into();
-        Self::new(init)
+    fn new<'a>(stem: &'a SteamClient, _p: ()) -> Result<Self, Self::StateError> where Self: Sized {
+        Self::new(stem.clone())
     }
 
-    fn new_with<I: Into<Self::Init>>(local_addr: I, config: Self::ServerConfig) -> Result<Self, Self::StateError> where Self: Sized {
-        let local_addr = local_addr.into();
-        Self::new_with(local_addr, config)
+    fn new_with<'a>(stem: &'a SteamClient, _p: (), config: Self::ServerConfig) -> Result<Self, Self::StateError> where Self: Sized {
+        Self::new_with(stem.clone(), config)
     }
 
     fn process(&mut self) {

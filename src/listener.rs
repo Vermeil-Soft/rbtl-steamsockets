@@ -68,11 +68,6 @@ impl Listener {
 
     fn attempt_accept_connecting(&mut self, connection_request: ConnectionRequest) {
         use steamworks::networking_types::NetConnectionEnd;
-        println!(
-            "received event Connecting: {:?} user_data={}",
-            connection_request.remote(),
-            connection_request.user_data()
-        );
 
         let remote = connection_request.remote();
         if self.listener_config.accept_only_friends {
@@ -105,9 +100,11 @@ impl Listener {
         while let Some(event) = self.listen_socket.try_receive_event() {
             match event {
                 ListenSocketEvent::Connecting(connection_request) => {
+                    log::debug!("received event connecting: {:?}", connection_request.remote());
                     self.attempt_accept_connecting(connection_request);
                 }
                 ListenSocketEvent::Connected(connected) => {
+                    log::debug!("received event connected: {:?}", connected.remote());
                     let remote_identity = connected.remote();
                     let remote = Socket::from_listener(
                         connected.take_connection(),
@@ -116,6 +113,7 @@ impl Listener {
                     self.remotes.insert(remote_identity, remote);
                 }
                 ListenSocketEvent::Disconnected(disconnected) => {
+                    log::debug!("received event disconnected: {:?}", disconnected.remote());
                     let remote_identity = disconnected.remote();
                     if let Some(remote) = self.remotes.get_mut(&remote_identity) {
                         remote.set_terminated(true);

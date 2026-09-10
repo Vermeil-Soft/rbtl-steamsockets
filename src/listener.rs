@@ -141,6 +141,12 @@ impl Listener {
         self.process_remotes();
     }
 
+    pub fn post_process(&mut self) {
+        for (_, r) in self.remotes.iter_mut() {
+            r.post_process();
+        }
+    }
+
     fn apply_config(&mut self) -> bool {
         use steamworks::networking_types::{NetworkingConfigEntry, NetworkingConfigValue};
         if let Some(timeout) = &self.listener_config.socket_config.timeout {

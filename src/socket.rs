@@ -85,7 +85,7 @@ pub struct Socket {
     config: SocketConfig,
 
     // seq ids that we have received from remote, and need to be acknowledged 
-    received_acks_ids: VecDeque<SeqId>,
+    received_seq_ids: VecDeque<SeqId>,
 
     next_seq_id: SeqId,
     // seq_ids where we are waiting for a confirmation. only used for `is_seq_id_received`
@@ -161,7 +161,7 @@ impl Socket {
             net_conn,
             tmp_buff: Vec::new(),
             ping_tracker: PingTracker::new(),
-            received_acks_ids: Default::default(),
+            received_seq_ids: Default::default(),
             events: Default::default(),
             remote_identity,
             config,
@@ -204,6 +204,13 @@ impl Socket {
         self.process_status_change();
     }
 
+    pub fn post_process(&mut self) {
+        if !self.status.can_use_net_conn() {
+            return
+        }
+        self.send_acks();
+    }
+
     pub (crate) fn process_incoming_messages(&mut self) {
         self.net_conn.receive_messages_with(|networking_message| {
             let msg_flags = networking_message.send_flags();
@@ -220,7 +227,7 @@ impl Socket {
                 self.ping_tracker.pong(*ack_seq_id);
             }
             if msg_flags.contains(SendFlags::RELIABLE) {
-                self.received_acks_ids.push_back(raw_msg_in.common.seq_id);
+                self.received_seq_ids.push_back(raw_msg_in.common.seq_id);
             }
             if raw_msg_in.common.has_data {
                 self.events.push_back(SocketEvent::Data(self.tmp_buff.clone().into_boxed_slice()));
@@ -290,12 +297,29 @@ impl Socket {
             self.waiting_acks.insert(seq_id);
         }
 
-        let raw_msg_out = raw_msg::RawMsgOut::new(&mut self.received_acks_ids, seq_id, data);
+        let raw_msg_out = raw_msg::RawMsgOut::new(&mut self.received_seq_ids, seq_id, data);
         raw_msg_out.encode_into(&mut self.tmp_buff);
         self.net_conn.send_message(&self.tmp_buff, send_flags)
             .map_err(|e| Error::from_cause("failed to send p2p steamworks sockets msg", e))?;
 
         Ok(seq_id)
+    }
+
+    /// Send non-sent acks if there are any to send.
+    ///
+    /// They are usually sent at the same time as messages, but sometimes we don't have messages
+    /// to send, so this must be called manually just in case.
+    /// 
+    /// Automatically called by `post_processing`
+    pub fn send_acks(&mut self) {
+        if self.received_seq_ids.len() == 0 {
+            return;
+        }
+        let seq_id = self.get_seq_id();
+        let raw_msg_out = raw_msg::RawMsgOut::new(&mut self.received_seq_ids, seq_id, &[]);
+        raw_msg_out.encode_into(&mut self.tmp_buff);
+        let _r = self.net_conn.send_message(&self.tmp_buff, SendFlags::RELIABLE_NO_NAGLE)
+            .map_err(|e| Error::from_cause("failed to send p2p steamworks ack msg", e));
     }
 
     pub fn remote_identity(&self) -> NetworkingIdentity {

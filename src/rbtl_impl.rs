@@ -47,6 +47,10 @@ impl Client for Socket {
     fn process(&mut self) {
         let _r = self.process();
     }
+    
+    fn post_process(&mut self) {
+        self.post_process();
+    }
 
     fn ping(&self, seconds: f32) -> Option<f32> {
         self.avg_ping(seconds)
@@ -164,6 +168,10 @@ impl Server for Listener {
 
     fn process(&mut self) {
         self.process();
+    }
+    
+    fn post_process(&mut self) {
+        self.post_process();
     }
 
     fn end(&mut self) {

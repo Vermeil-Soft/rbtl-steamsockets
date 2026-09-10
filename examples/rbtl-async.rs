@@ -109,6 +109,7 @@ fn spawn_server(only_friend: bool) {
                 println!("(serv) sending message to {} remotes...", listener.connected_len());
             }
         }
+        listener.post_process();
 
         std::thread::sleep(std::time::Duration::from_millis(16));
     }

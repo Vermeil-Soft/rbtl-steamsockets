@@ -6,9 +6,9 @@ edition = "2024"
 [dependencies]
 # steamworks = { version = ">=0.13, <1" }
 steamworks = { git = "https://github.com/Vermeil-Soft/steamworks-rs.git", branch = "networking_identity_fix2"}
-rbtl-core = { git = "https://github.com/Vermeil-Soft/rbtl.git", rev = "e3cf55078c7af4dea52a1" }
+rbtl-core = { git = "https://github.com/Vermeil-Soft/rbtl.git", rev = "d99d6f4a88cef5e32e5f" }
 hashbrown = ">=0.9, <1"
 log = "0.4"
 
 [dev-dependencies]
-rbtl = { git = "https://github.com/Vermeil-Soft/rbtl.git", rev = "e3cf55078c7af4dea52a1", default-features = false }
+rbtl = { git = "https://github.com/Vermeil-Soft/rbtl.git", rev = "d99d6f4a88cef5e32e5f", default-features = false }

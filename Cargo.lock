@@ -348,7 +348,7 @@ dependencies = [
 [[package]]
 name = "steamworks"
 version = "0.13.1"
-source = "git+https://github.com/Vermeil-Soft/steamworks-rs.git?branch=networking_identity_fix2#0fc6405f839a8cb323a4a9682694d5d54ea9f92e"
+source = "git+https://github.com/Vermeil-Soft/steamworks-rs.git?branch=networking_identity_fix2#224441679cefa88e2b7fd568829a516e462291c1"
 dependencies = [
  "bitflags",
  "paste",
@@ -359,7 +359,7 @@ dependencies = [
 [[package]]
 name = "steamworks-sys"
 version = "0.13.0"
-source = "git+https://github.com/Vermeil-Soft/steamworks-rs.git?branch=networking_identity_fix2#0fc6405f839a8cb323a4a9682694d5d54ea9f92e"
+source = "git+https://github.com/Vermeil-Soft/steamworks-rs.git?branch=networking_identity_fix2#224441679cefa88e2b7fd568829a516e462291c1"
 
 [[package]]
 name = "subtle"

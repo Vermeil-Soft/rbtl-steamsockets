@@ -178,6 +178,10 @@ impl Server for Listener {
         // self.disconnect();
     }
 
+    fn disconnect(&mut self, k: &Self::Key) -> bool {
+        self.disconnect(k)
+    }
+
     fn send_all<B>(&mut self, bytes: B, send_opts: Self::SendOptions) -> Result<(), Self::SendError>
             where B: Into<Arc<[u8]>> + AsRef<[u8]> + Clone {
         self.send_data(bytes.as_ref(), send_opts)

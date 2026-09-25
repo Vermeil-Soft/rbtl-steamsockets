@@ -1,10 +1,9 @@
 use std::time::{Duration, Instant};
 
 use steamworks::{
-    Client as SteamClient, FriendFlags, networking_sockets::{ListenSocket, NetConnection},
+    Client as SteamClient, FriendFlags, networking_sockets::{ListenSocket},
     networking_types::{
-        NetworkingConfigEntry, NetworkingConfigValue, ConnectionRequest,
-        ListenSocketEvent, NetworkingIdentity
+        ConnectionRequest, ListenSocketEvent, NetworkingIdentity, NetConnectionEnd
     }
 };
 use hashbrown::HashMap;
@@ -210,6 +209,15 @@ impl Listener {
         Some(Ok(ConnectInfo::new(self.steam_client.user().steam_id())))
     }
 
+    pub fn disconnect(&mut self, remote: &NetworkingIdentity) -> bool {
+        if let Some(remote) = self.remotes.remove(remote) {
+            remote.net_conn.close(NetConnectionEnd::MiscGeneric, None, true);
+            true
+        } else {
+            false
+        }
+    }
+
     pub fn send_data(&mut self, data: &[u8], send_options: SendOptions) -> Result<(), Error> {
         let mut err: Option<Error> = None;
         let mut has_success = false;
@@ -234,6 +242,15 @@ impl Listener {
         self.remotes.iter_mut().flat_map(|(addr, socket)| {
             socket.drain_events().map(move |event| (addr.clone(), event) )
         })
+    }
+}
+
+impl std::fmt::Debug for Listener {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Listener")
+            .field("remotes", &self.remotes)
+            .field("config", &self.listener_config)
+            .finish_non_exhaustive()
     }
 }
 

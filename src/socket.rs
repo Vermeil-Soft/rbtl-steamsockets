@@ -92,6 +92,19 @@ pub struct Socket {
     waiting_acks: HashSet<SeqId>,
 }
 
+impl std::fmt::Debug for Socket {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Socket")
+            .field("status", &self.status)
+            .field("remote_identity", &self.remote_identity)
+            .field("config", &self.config)
+            .field("received_seq_ids", &self.received_seq_ids)
+            .field("next_seq_id", &self.next_seq_id)
+            .field("waiting_acks", &self.waiting_acks)
+            .finish_non_exhaustive()
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct SendOptions {
     pub reliable: bool,

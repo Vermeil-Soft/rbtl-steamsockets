@@ -45,7 +45,7 @@ impl Client for Socket {
     }
 
     fn process(&mut self) {
-        let _r = self.process();
+        self.process();
     }
     
     fn post_process(&mut self) {

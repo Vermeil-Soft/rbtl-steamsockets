@@ -243,6 +243,12 @@ impl Listener {
             socket.drain_events().map(move |event| (addr.clone(), event) )
         })
     }
+
+    pub fn next_event(&mut self) -> Option<(NetworkingIdentity, SocketEvent)> {
+        self.remotes.iter_mut().flat_map(|(addr, socket)| {
+            socket.next_event().map(move |event| (addr.clone(), event) )
+        }).next()
+    }
 }
 
 impl std::fmt::Debug for Listener {

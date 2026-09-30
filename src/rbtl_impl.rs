@@ -35,6 +35,10 @@ impl Client for Socket {
         self.drain_events().map(|e| e.to_rbtl_event())
     }
 
+    fn next_event(&mut self) -> Option<Event> {
+        self.next_event().map(|e| e.to_rbtl_event())
+    }
+
     fn new<'a>(stem: &'a Self::Stem<'a>, create_params: Self::CreateParams, options: Self::ConnectOptions) -> Result<Self, Self::StateError> where Self: Sized {
         Self::new_with(stem, create_params, options)
     }
@@ -119,6 +123,11 @@ impl Server for Listener {
 
     fn drain_events<'a>(&'a mut self) -> impl Iterator<Item=(Self::Key, Event)> + 'a {
         self.drain_events()
+            .map(|(id, ev)| (id, ev.to_rbtl_event()))
+    }
+
+    fn next_event(&mut self) -> Option<(Self::Key, Event)> {
+        self.next_event()
             .map(|(id, ev)| (id, ev.to_rbtl_event()))
     }
 

@@ -22,9 +22,8 @@ fn spawn_client(steam_id: Option<String>) {
     };
 
     let steam_id = u64::from_str_radix(&steam_id.trim(), 16).expect("unable to parse steam id from hex");
-    let networking = steam.networking_sockets();
 
-    let client_stem = RBTLClientStem { steam_sockets: Some(&networking) };
+    let client_stem = RBTLClientStem { steam_sockets: Some(&steam) };
     let client_connect_info = RBTLClientConnectInfo {
         steam_sockets: Some(ConnectInfo::new(SteamId::from_raw(steam_id))),
         unknown: vec![]
@@ -78,7 +77,6 @@ fn spawn_client(steam_id: Option<String>) {
     }
     drop(client);
     std::thread::sleep(std::time::Duration::from_millis(100));
-    drop(networking);
     println!("(client) shutting down");
 }
 

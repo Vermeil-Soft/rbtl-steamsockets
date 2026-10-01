@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use rbtl_core::{Client, Event, ServClient, Server, Status, ServerStateError};
-use steamworks::{Client as SteamClient, networking_sockets::NetworkingSockets, networking_types::NetworkingIdentity};
+use steamworks::{Client as SteamClient, networking_types::NetworkingIdentity};
 
 use crate::{
     Listener, Socket, SocketConfig, SeqId, Error, ListenerConfig, ConnectInfo,
@@ -15,7 +15,7 @@ impl Client for Socket {
     type StateError = Error;
     type SendError = Error;
     type CreateParams = SocketCreateParams;
-    type Stem<'a> = &'a NetworkingSockets;
+    type Stem<'a> = &'a SteamClient;
     type SendOptions = SendOptions;
 
     fn status(&self) -> Status {

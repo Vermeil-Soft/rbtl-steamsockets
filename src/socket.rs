@@ -191,14 +191,15 @@ impl Socket {
         r
     }
 
-    pub fn new(sockets: &NetworkingSockets, create_params: SocketCreateParams) -> Result<Self, Error> {
-        Self::new_with(sockets, create_params, Default::default())
+    pub fn new(steam: &SteamClient, create_params: SocketCreateParams) -> Result<Self, Error> {
+        Self::new_with(steam, create_params, Default::default())
     }
 
-    pub fn new_with(sockets: &NetworkingSockets, params: SocketCreateParams, config: SocketConfig) -> Result<Self, Error> {
+    pub fn new_with(steam: &SteamClient, params: SocketCreateParams, config: SocketConfig) -> Result<Self, Error> {
         let net_options = Self::get_networking_options(config.timeout);
         log::info!("trying to connect to id {:?}", params.remote_identity);
-        let net_conn = sockets.connect_p2p(params.remote_identity.clone(), params.virt_port, net_options)
+        let net_conn = steam.networking_sockets()
+            .connect_p2p(params.remote_identity.clone(), params.virt_port, net_options)
             .map_err(|e| Error::from_cause("failed to create steamworks-networkingsockets handle", e))?;
 
         Ok(Self::from_net_conn(net_conn, params.remote_identity, config))

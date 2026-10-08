@@ -249,7 +249,7 @@ dependencies = [
 [[package]]
 name = "rbtl"
 version = "0.1.0"
-source = "git+https://github.com/Vermeil-Soft/rbtl.git?rev=e4dbfe26#e4dbfe268d2b25db0a8108d6ebbfa3dcebe23626"
+source = "git+https://github.com/Vermeil-Soft/rbtl.git?rev=d8ce7f34#d8ce7f34984f5aac918fc9995c08dec03c491b3c"
 dependencies = [
  "log",
  "paste",
@@ -261,12 +261,12 @@ dependencies = [
 [[package]]
 name = "rbtl-core"
 version = "0.1.0"
-source = "git+https://github.com/Vermeil-Soft/rbtl.git?rev=e4dbfe26#e4dbfe268d2b25db0a8108d6ebbfa3dcebe23626"
+source = "git+https://github.com/Vermeil-Soft/rbtl.git?rev=d8ce7f34#d8ce7f34984f5aac918fc9995c08dec03c491b3c"
 
 [[package]]
 name = "rbtl-rudp"
 version = "0.1.0"
-source = "git+https://github.com/Vermeil-Soft/rbtl.git?rev=e4dbfe26#e4dbfe268d2b25db0a8108d6ebbfa3dcebe23626"
+source = "git+https://github.com/Vermeil-Soft/rbtl.git?rev=d8ce7f34#d8ce7f34984f5aac918fc9995c08dec03c491b3c"
 dependencies = [
  "byteorder",
  "chacha20poly1305",
@@ -292,7 +292,7 @@ dependencies = [
 [[package]]
 name = "rbtl-tcp"
 version = "0.1.0"
-source = "git+https://github.com/Vermeil-Soft/rbtl.git?rev=e4dbfe26#e4dbfe268d2b25db0a8108d6ebbfa3dcebe23626"
+source = "git+https://github.com/Vermeil-Soft/rbtl.git?rev=d8ce7f34#d8ce7f34984f5aac918fc9995c08dec03c491b3c"
 dependencies = [
  "byteorder",
  "hashbrown",
